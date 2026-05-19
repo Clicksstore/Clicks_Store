@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicks Pro | نظام الإدارة الشامل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2>بوابة الإدارة الآمنة</h2>
+            <p>متجر Clicks للإلكترونيات</p>
+            
+            <form id="adminLoginForm">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="adminEmail" placeholder="البريد الإلكتروني للمسؤول" required autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="adminPassword" placeholder="كلمة المرور" required autocomplete="current-password">
+                </div>
+                <button type="submit" id="loginBtn">
+                    تسجيل الدخول للنظام <i class="fas fa-sign-in-alt"></i>
+                </button>
+                <div id="loginError" class="error-msg" style="display:none;">
+                    <i class="fas fa-exclamation-triangle"></i> بيانات الدخول غير صحيحة!
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-laptop-code"></i> Cli<span>cks</span> Pro
+        </div>
+        <div class="sidebar-user">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=0061f2&color=fff&bold=true" alt="Admin">
+            <div class="user-info">
+                <h4>المدير العام</h4>
+                <span>متصل الآن <i class="fas fa-circle text-success" style="font-size: 10px; color: #10b981;"></i></span>
+            </div>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="#" class="active" onclick="switchTab('dashboard', this)"><i class="fas fa-chart-line"></i> <span>لوحة القيادة</span></a>
+            <a href="#" onclick="switchTab('orders', this)">
+                <i class="fas fa-shopping-bag"></i> <span>الطلبات الواردة</span> 
+                <span class="badge bg-danger" id="menuOrdersCount">0</span>
+            </a>
+            <a href="#" onclick="switchTab('add', this)"><i class="fas fa-plus-square"></i> <span>إضافة منتج جديد</span></a>
+            <a href="#" onclick="switchTab('manage', this)"><i class="fas fa-tasks"></i> <span>إدارة المنتجات</span></a>
+            <a href="#" onclick="switchTab('warehouse', this)"><i class="fas fa-warehouse"></i> <span>جرد المخزون</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="index.html" target="_blank" class="btn-store"><i class="fas fa-store"></i> زيارة المتجر</a>
+            <button onclick="logoutAdmin()" class="btn-logout"><i class="fas fa-power-off"></i> تسجيل الخروج</button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="header-left">
+                <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                <h1 class="header-title" id="pageTitle">لوحة القيادة (Dashboard)</h1>
+            </div>
+            <div class="header-right">
+                <div class="date-display" id="currentDate"><i class="far fa-calendar-alt"></i> <span></span></div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            
+            <div id="dashboardSection" class="admin-section animate-fade">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-blue-light"><i class="fas fa-shopping-cart text-blue"></i></div>
+                        <div class="stat-info">
+                            <p>طلبات بانتظار التنفيذ</p>
+                            <h3 id="statNewOrders">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-green-light"><i class="fas fa-box-open text-green"></i></div>
+                        <div class="stat-info">
+                            <p>إجمالي المنتجات المعروضة</p>
+                            <h3 id="statTotalProducts">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-red-light"><i class="fas fa-exclamation-triangle text-red"></i></div>
+                        <div class="stat-info">
+                            <p>منتجات قاربت على النفاذ (< 5)</p>
+                            <h3 id="statLowStock">0</h3>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-orange-light"><i class="fas fa-wallet text-orange"></i></div>
+                        <div class="stat-info">
+                            <p>إجمالي المبيعات المكتملة</p>
+                            <h3 id="statTotalRevenue">0 <span>ج.م</span></h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-30">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-clock"></i> أحدث الطلبات (نظرة سريعة)</h3>
+                        <button class="btn btn-outline" onclick="document.querySelectorAll('.sidebar-menu a')[1].click()">عرض الكل</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                            <tbody id="recentOrdersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ordersSection" class="admin-section animate-fade" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-list-ul"></i> السجل الشامل للطلبات</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="modern-table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>رقم الطلب</th>
+                                    <th>بيانات العميل</th>
+                                    <th>تاريخ الطلب</th>
+                                    <th>القيمة الإجمالية</th>
+                                    <th>حالة الطلب</th>
+                                    <th>إجراءات الإدارة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="addSection" class="admin-section animate-fade" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-plus-circle"></i> إدراج منتج جديد للمتجر</h3>
+                    </div>
+                    <form id="addProductForm" onsubmit="saveNewProduct(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>اسم المنتج <span class="req">*</span></label>
+                                <input type="text" id="itemName" required placeholder="مثال: لابتوب ديل انسبايرون">
+                            </div>
+                            <div class="form-group">
+                                <label>الماركة / العلامة التجارية</label>
+                                <input type="text" id="itemBrand" placeholder="مثال: Dell, Samsung">
+                            </div>
+                            <div class="form-group">
+                                <label>رقم الموديل / SKU</label>
+                                <input type="text" id="itemSKU" placeholder="كود المنتج الداخلي">
+                            </div>
+                            <div class="form-group">
+                                <label>القسم الرئيسي <span class="req">*</span></label>
+                                <select id="itemCategory" required>
+                                    <option value="Mobiles">موبايلات و هواتف ذكية</option>
+                                    <option value="Laptops">أجهزة لابتوب</option>
+                                    <option value="PC">كمبيوترات و PC</option>
+                                    <option value="Tablets">أجهزة تابلت</option>
+                                    <option value="Accessories">إكسسوارات وقطع غيار</option>
+                                    <option value="Services">خدمات وصيانة</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>حالة المنتج</label>
+                                <select id="itemCondition">
+                                    <option value="جديد">جديد بالكرتونة (New)</option>
+                                    <option value="مستعمل">مستعمل بحالة ممتازة (Used)</option>
+                                    <option value="مجدد">مجدد معتمد (Refurbished)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>مدة الضمان</label>
+                                <input type="text" id="itemWarranty" placeholder="مثال: سنة واحدة ضد عيوب الصناعة">
+                            </div>
+                            <div class="form-group">
+                                <label>السعر الحالي (ج.م) <span class="req">*</span></label>
+                                <input type="number" id="itemPrice" required placeholder="سعر البيع النهائي">
+                            </div>
+                            <div class="form-group">
+                                <label>السعر القديم (لعمل خصم)</label>
+                                <input type="number" id="itemOldPrice" placeholder="السعر قبل الخصم (اختياري)">
+                            </div>
+                            <div class="form-group">
+                                <label>الكمية المتاحة بالمخزن <span class="req">*</span></label>
+                                <input type="number" id="itemQty" value="1" required min="0">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>الوصف التفصيلي والمواصفات</label>
+                                <textarea id="itemDesc" rows="5" placeholder="اكتب مواصفات المنتج بدقة ليتمكن العميل من قراءتها..."></textarea>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label>صورة المنتج الرئيسية <span class="req">*</span></label>
+                                <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                    <h4>اضغط هنا لاختيار صورة المنتج</h4>
+                                    <p>يدعم صيغ JPG, PNG, WEBP (يفضل خلفية بيضاء)</p>
+                                    <input type="file" id="fileInput" hidden accept="image/*">
+                                    <img id="imagePreview" class="preview-image" style="display:none;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions mt-30">
+                            <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                                <i class="fas fa-save"></i> حفظ ونشر المنتج
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-lg" onclick="document.getElementById('addProductForm').reset(); document.getElementById('imagePreview').style.display='none';">
+                                تفريغ الحقول
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="manageSection" class="admin-section animate-fade" style="display: none;">
+                <div class="tabs-modern">
+                    <button class="tab-btn active" onclick="loadManageData('all', this)">كل المنتجات</button>
+                    <button class="tab-btn" onclick="loadManageData('Mobiles', this)">موبايلات</button>
+                    <button class="tab-btn" onclick="loadManageData('Laptops', this)">لابتوبات</button>
+                    <button class="tab-btn" onclick="loadManageData('PC', this)">كمبيوتر</button>
+                    <button class="tab-btn" onclick="loadManageData('Accessories', this)">إكسسوارات</button>
+                    <button class="tab-btn" onclick="loadManageData('Services', this)">صيانة</button>
+                </div>
+                <div class="card mt-20">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead><tr><th>صورة</th><th>تفاصيل المنتج</th><th>القسم</th><th>سعر البيع</th><th>إجراءات التحكم</th></tr></thead>
+                            <tbody id="manageTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="warehouseSection" class="admin-section animate-fade" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-boxes"></i> مراقبة المخزون وتحديث الكميات السريع</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="modern-table table-striped">
+                            <thead><tr><th>اسم المنتج (SKU)</th><th>القسم المضاف إليه</th><th>مؤشر الحالة</th><th>تحديث الكمية الفعّالة</th></tr></thead>
+                            <tbody id="warehouseTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="modal" id="orderModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-receipt text-primary"></i> فاتورة الطلب: <span id="modalOrderId" class="text-muted"></span></h2>
+                <button class="close-btn" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="invoice-grid">
+                    <div class="invoice-box">
+                        <h4 class="box-title">بيانات العميل</h4>
+                        <ul class="info-list">
+                            <li><i class="fas fa-user"></i> <strong>الاسم:</strong> <span id="oName"></span></li>
+                            <li><i class="fas fa-phone"></i> <strong>الموبايل:</strong> <a href="#" id="oPhoneLink" target="_blank"><span id="oPhone"></span></a></li>
+                            <li><i class="fas fa-map-marker-alt"></i> <strong>العنوان:</strong> <span id="oAddress"></span></li>
+                        </ul>
+                    </div>
+                    <div class="invoice-box">
+                        <h4 class="box-title">تفاصيل الدفع والتوصيل</h4>
+                        <ul class="info-list">
+                            <li><i class="fas fa-truck"></i> <strong>طريقة الاستلام:</strong> <span id="oDelivery" class="badge bg-info"></span></li>
+                            <li><i class="fas fa-money-bill-wave"></i> <strong>وسيلة الدفع:</strong> <span id="oPayment" class="badge bg-warning"></span></li>
+                            <li><i class="fas fa-calendar-alt"></i> <strong>تاريخ الطلب:</strong> <span id="oDate"></span></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h4 class="mt-30 mb-15">المنتجات المطلوبة في هذه الفاتورة:</h4>
+                <div class="order-items-wrapper">
+                    <table class="modern-table">
+                        <tbody id="oItemsList"></tbody>
+                    </table>
+                </div>
+                
+                <div class="total-amount-box mt-20">
+                    <span>إجمالي الفاتورة المطلوب تحصيله:</span>
+                    <h2 id="oTotal" class="text-success"></h2>
+                </div>
+
+                <div class="status-updater mt-30">
+                    <label>تحديث مسار الطلب:</label>
+                    <div class="status-controls">
+                        <select id="oStatusSelect" class="form-control">
+                            <option value="جديد">طلب جديد (قيد المراجعة)</option>
+                            <option value="قيد التنفيذ">قيد التنفيذ والتغليف</option>
+                            <option value="تم التوصيل">مكتمل (تم التوصيل للعميل)</option>
+                            <option value="ملغي">إلغاء الطلب</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="updateOrderStatus()"><i class="fas fa-sync"></i> حفظ التحديث</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit text-warning"></i> تحديث بيانات المنتج</h2>
+                <button class="close-btn" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group"><label>الاسم</label><input type="text" id="eName" class="form-control"></div>
+                    <div class="form-group"><label>الماركة</label><input type="text" id="eBrand" class="form-control"></div>
+                    <div class="form-group"><label>الكود (SKU)</label><input type="text" id="eSKU" class="form-control"></div>
+                    <div class="form-group">
+                        <label>القسم</label>
+                        <select id="eCategory" class="form-control">
+                            <option value="Mobiles">موبايلات</option><option value="Laptops">لابتوبات</option>
+                            <option value="PC">كمبيوتر</option><option value="Tablets">تابلت</option>
+                            <option value="Accessories">إكسسوارات</option><option value="Services">صيانة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الحالة</label>
+                        <select id="eCondition" class="form-control"><option value="جديد">جديد</option><option value="مستعمل">مستعمل</option><option value="مجدد">مجدد</option></select>
+                    </div>
+                    <div class="form-group"><label>السعر الأساسي</label><input type="number" id="ePrice" class="form-control"></div>
+                    <div class="form-group"><label>السعر القديم</label><input type="number" id="eOldPrice" class="form-control"></div>
+                    <div class="form-group"><label>الكمية الحالية</label><input type="number" id="eQty" class="form-control"></div>
+                    <div class="form-group"><label>الضمان</label><input type="text" id="eWarranty" class="form-control"></div>
+                    <div class="form-group full-width"><label>وصف المنتج</label><textarea id="eDesc" rows="4" class="form-control"></textarea></div>
+                    <div class="form-group full-width">
+                        <label>تحديث الصورة (اتركه فارغاً إذا لم ترد التغيير)</label>
+                        <input type="file" id="eFileInput" accept="image/*" class="form-control" style="background: white; padding: 10px;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer mt-20">
+                <button class="btn btn-primary btn-lg" onclick="saveEditProduct()" style="width: 100%;"><i class="fas fa-save"></i> اعتماد وتحديث البيانات</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminToastContainer"></div>
+
+    <script type="module" src="admin-app.js"></script>
+</body>
+</html>
