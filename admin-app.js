@@ -331,7 +331,7 @@ window.loadManageData = (cat, btnEl) => {
             const p = docSnap.data();
             const prodId = docSnap.id;
             
-            // 1. نقوم بإنشاء الصف فوراً ونضع صورة مؤقتة خفيفة
+            // 1. إنشاء الصف فوراً بدون انتظار الصور
             tbody.innerHTML += `
                 <tr id="row-${prodId}">
                     <td>
@@ -349,7 +349,7 @@ window.loadManageData = (cat, btnEl) => {
                     </td>
                 </tr>`;
                 
-            // 2. نقوم بتحميل الصورة في الخلفية دون تعطيل ظهور باقي النص
+            // 2. تحميل الصور في الخلفية براحتها
             if (p.image) {
                 setTimeout(() => {
                     const imgEl = document.getElementById(`img-prod-${prodId}`);
@@ -463,5 +463,3 @@ document.addEventListener('keydown', (e) => {
         closeOrderModal();
     }
 });
-
-}
