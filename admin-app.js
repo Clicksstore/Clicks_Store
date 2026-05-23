@@ -326,19 +326,46 @@ window.loadManageData = (cat, btnEl) => {
     unsubscribeManage = onSnapshot(q, (snap) => {
         const tbody = document.getElementById('manageTableBody');
         tbody.innerHTML = "";
+        
         snap.forEach(docSnap => {
             const p = docSnap.data();
+            const prodId = docSnap.id;
+            
+            // 1. نقوم بإنشاء الصف فوراً ونضع صورة مؤقتة خفيفة
             tbody.innerHTML += `
-                <tr>
-                    <td><img src="${p.image}" style="width:60px; height:60px; object-fit:contain; border-radius:10px; background:#f8fafc; padding:5px; border:1px solid #e2e8f0;"></td>
+                <tr id="row-${prodId}">
+                    <td>
+                        <div id="img-loader-${prodId}" style="width:60px; height:60px; display:flex; align-items:center; justify-content:center; background:#e2e8f0; border-radius:10px;">
+                            <i class="fas fa-spinner fa-spin text-muted"></i>
+                        </div>
+                        <img id="img-prod-${prodId}" style="width:60px; height:60px; object-fit:contain; border-radius:10px; background:#f8fafc; padding:5px; border:1px solid #e2e8f0; display:none;">
+                    </td>
                     <td><div style="font-weight:900; color:var(--dark); font-size:15px; margin-bottom:4px;">${p.name}</div><div style="font-size:12px; color:var(--text-muted);"><i class="fas fa-tag"></i> ${p.brand || 'عام'} | SKU: ${p.sku || 'N/A'}</div></td>
                     <td><span class="badge bg-info">${p.category}</span></td>
                     <td style="color:var(--primary); font-weight:900; font-size:16px;">${Number(p.price).toLocaleString()} ج.م</td>
                     <td>
-                        <button class="btn btn-icon btn-outline" onclick="openEditModal('${docSnap.id}')" title="تعديل"><i class="fas fa-pen text-warning"></i></button>
-                        <button class="btn btn-icon btn-outline" onclick="deleteProd('${docSnap.id}')" title="حذف"><i class="fas fa-trash text-danger"></i></button>
+                        <button class="btn btn-icon btn-outline" onclick="openEditModal('${prodId}')" title="تعديل"><i class="fas fa-pen text-warning"></i></button>
+                        <button class="btn btn-icon btn-outline" onclick="deleteProd('${prodId}')" title="حذف"><i class="fas fa-trash text-danger"></i></button>
                     </td>
                 </tr>`;
+                
+            // 2. نقوم بتحميل الصورة في الخلفية دون تعطيل ظهور باقي النص
+            if (p.image) {
+                setTimeout(() => {
+                    const imgEl = document.getElementById(`img-prod-${prodId}`);
+                    const loaderEl = document.getElementById(`img-loader-${prodId}`);
+                    if (imgEl && loaderEl) {
+                        imgEl.src = p.image;
+                        imgEl.onload = () => {
+                            loaderEl.style.display = 'none';
+                            imgEl.style.display = 'block';
+                        };
+                    }
+                }, 50);
+            } else {
+                const loaderEl = document.getElementById(`img-loader-${prodId}`);
+                if(loaderEl) loaderEl.innerHTML = '<i class="fas fa-box text-muted"></i>';
+            }
         });
     });
 };
@@ -436,3 +463,5 @@ document.addEventListener('keydown', (e) => {
         closeOrderModal();
     }
 });
+
+}
